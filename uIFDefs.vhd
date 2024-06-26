@@ -17,7 +17,7 @@ constant inst_size: integer := 20; --! tamanho do barramento de instruções
 
 -- registradores
 constant reg_qtd: integer:= 8; --! quantidade de registradores internos
-subtype reg_sel is unsigned(2 downto 0);
+subtype reg_sel is unsigned(2 downto 0); --! palavra associada a seleção do registrador
 subtype reg_word is std_logic_vector(data_size-1 downto 0); --! tamanho de um registrador
 
 -- tamanhos das memorias
@@ -28,41 +28,50 @@ constant ramsize: integer:= 8; -- tamanho da memoria RAM (2^)
 constant io_size: integer:= 32; --! quantidade de pinos de I/O
 
 -- UNIDADE DE CONTROLE
-type controlstates is (busca,decodifica,recupera_stack,executa,atualiza); --! Estados do controlador
+type controlstates is (busca,decodifica,recupera_stack,executa,atualiza); --! estados do controlador
 
 -- instruções (opcode)
-subtype instruction is std_logic_vector(inst_size-1 downto 0);
-subtype instr_type is std_logic_vector(1 downto 0);
-subtype instr_subtype is std_logic_vector(3 downto 0);
-subtype reg_subtype is std_logic_vector(2 downto 0);
+subtype instruction is std_logic_vector(inst_size-1 downto 0); --! tipo associado a uma instrução completa
+subtype instr_type is std_logic_vector(1 downto 0); --! indicação da categoria de instrução sendo analisada
+subtype instr_subtype is std_logic_vector(3 downto 0); --! indicação do código de instrução dentro da categoria analisada
+subtype reg_subtype is std_logic_vector(2 downto 0); --! indicação do número do registrados associado a instrução analisada
 
--- controle (inicia em 00) 
-constant controlcode: instr_type:= "00"; --! opcode do conjunto de instruções de controle do fluxo de execuç~ao
-subtype control_type is instr_subtype; --! opcodes espec´ificos de controle
+-- CONTROLE (inicia em 00) 
+
+--! opcode do conjunto de instruções de controle do fluxo de execução
+constant controlcode: instr_type:= "00"; 
+subtype control_type is instr_subtype; --! opcodes específicos de controle
+
 -- nop               -- 00_0000
-constant nopcode: control_type:= "0000"; --! @brief Opcode da instruç~ao nop 
-                                         --! @details Nenhuma operaç~ao
--- call addr			-- 10_0000
-constant callcode: control_type:= "0001"; --! @brief Opcode da instruç~ao call addr
-                                          --! @details PC<-addr; stack<-PC+1
--- ret					-- 10_0101
-constant retcode: control_type:= "0010"; --! opcode da instruç~ao ret
--- jmp addr	   		-- 10_0110
-constant jmpcode: control_type:= "0100"; --! opcode da instruç~ao jmp addr
--- jpz addr          -- 10_0111
-constant jpzcode: control_type:= "0101"; --! opcode da instruç~ao jpz addr
--- jpnz addr         -- 10_1000
-constant jpnzcode: control_type:= "0110"; --! opcode da instruç~ao jpnz addr
--- jpc addr          -- 10_1001
-constant jpccode: control_type:= "0111"; --! opcode da instruç~ao jpc addr
--- jpnc addr         -- 10_1010
-constant jpnccode: control_type:= "1000"; --! opcode da instruç~ao jpnc addr
+constant nopcode: control_type:= "0000"; --! @brief Opcode da instrução nop 
+                                         --! @details Nenhuma operação
+-- call addr			-- 00_0001
+constant callcode: control_type:= "0001"; --! @brief Opcode da instrução call addr
+                                          --! @details PC<-addr; (stack)<-PC+1; stack<- stack-2
+-- ret					-- 00_0010
+constant retcode: control_type:= "0010";  --! @brief Opcode da instrução de retorno
+														--! @details PC<-(stack); stack<-stack+2
+-- jmp addr	   		-- 00_0011
+constant jmpcode: control_type:= "0011"; --! @brief Opcode da instrução jmp addr
+													  --! @details PC<-addr
+-- jpz addr          -- 00_0100
+constant jpzcode: control_type:= "0100"; --! @brief Opcode da instrução jpz addr
+													  --! @details if (Z) PC<-addr
+-- jpnz addr         -- 00_0101
+constant jpnzcode: control_type:= "0101"; --! @brief Opcode da instrução jpnz addr
+														--! @details if (!Z) PC<-addr
+-- jpc addr          -- 00_0110
+constant jpccode: control_type:= "0110"; --! @brief Opcode da instrução jpc addr
+													  --! @details if (C) PC<-addr
+-- jpnc addr         -- 00_0111
+constant jpnccode: control_type:= "0111"; --! @bried Opcode da instrução jpnc addr
+														--! @details if (!C) PC<-addr
 
+-- ULA (inicia em 01)
+--! Opcode do conjunto de instruções da ULA
+constant ulacode: instr_type:= "01"; 
 
---! Opcode do conjunto de instruç~oes da ULA
-constant ulacode: instr_type:= "01";
-
---! Subtipo que identifica os opcodes espec´ificos de operaç~oes com o bloco da ULA
+--! Subtipo que identifica os opcodes específicos de operações com o bloco da ULA
 subtype ula_type is instr_subtype;
 
 --! @brief Opcode da instrução and r1,r2

@@ -7,81 +7,6 @@
 ----------------------------------------------
 
 ----------------------------------------------
--- PROGRAM COUNTER
-----------------------------------------------
-library ieee;
-use ieee.std_logic_1164.all;
-use ieee.numeric_std.all;
-use work.uIFDefs.all;
-
---! Entidade representando o PC
-entity pgrCounter is
-  port(
-    clk: in std_logic; --! Sinal de clock geral
-	 rst: in std_logic; --! Sinal de reset geral
-	 addr: out unsigned(romsize-1 downto 0); --! Endereço indicado pelo PC
-    nextaddr: out unsigned(romsize-1 downto 0); --! Pr´oxima posiç~ao do PC
-	 pstate: in controlstates; --! Dados de controle para operacao do PC
-    jump: in boolean; --! Indica se deve operar de acordo com alguma instriç~ao de controle do PC
-    cflag: in std_logic; --! Flag de carry, usado para decis~oes de salto
-    zflag: in std_logic; --! Flag de zero, usado para decis~oes de salto
-    condition: in control_type; --! Opcode da operaç~ao de salto
-    jmpaddr: in unsigned(romsize-1 downto 0) --! Endereço absoluto de mem´oria
-  );
-end pgrCounter;
-
-architecture imp of pgrCounter is
-  signal PC: unsigned(romsize-1 downto 0);
-  signal PCinput: unsigned(romsize-1 downto 0);
-begin
-  addr<= PC;
-  -- atualizacao do PC
-  process(clk,rst,pcinput)
-  begin
-    if (rst='1') then
-	   PC <= (others=>'0');
-	 elsif rising_edge(clk) then
-	   if (pstate=executa) then
-  	     PC <= PCinput;
-		end if;
-	 end if;
-  end process;
-  -- definicao do novo PC
-  process(PC,jump,condition,jmpaddr,cflag,zflag)
-    variable nextPC: unsigned(romsize-1 downto 0);
-  begin
-    nextPC:= PC+1;
-    nextaddr<= nextPC;  
-    PCInput<= nextPC;
-    if (jump) then 
-      case condition is 
-        when jmpcode =>
-          PCInput<= jmpaddr;
-        when jpzcode =>
-          if (zflag='1') then
-            PCInput<= jmpaddr;
-          end if;
-        when jpnzcode =>
-          if (zflag='0') then
-            PCInput<= jmpaddr;
-          end if;
-        when jpccode =>
-          if (cflag='1') then
-            PCInput<= jmpaddr;
-          end if;
-        when jpnccode =>
-          if (cflag='0') then 
-            PCInput<= jmpaddr;
-          end if;
-        when callcode|retcode=>
-          PCInput<= jmpaddr;
-        when others =>
-      end case;
-    end if;
-  end process;
-end imp;
-
-----------------------------------------------
 -- M´ODULO DE I/O
 ----------------------------------------------
 library ieee;
@@ -540,9 +465,11 @@ begin
           is_instr_control<= true;
           case local_control_opcode is
             when callcode=>
-              -- armazena na mem´oria RAM, na posiç~ao indicada pelo stackreg
-              -- o endereço correspondente a posiç~ao de retorno (PC+1)
-              -- isso demanda dois estados da m´aquina
+              -- armazena na memória RAM, na posição indicada pelo stackreg
+              -- o endereço correspondente a posição de retorno (PC+1)
+              -- isso demanda dois estados da máquina 
+				  -- visto que a RAM opera síncrona (e são dois bytes a 
+				  -- armazenar em razão da posição de retorno)
               case pstate is
                 when decodifica=>
                   waddr<= std_logic_vector(stack_reg);

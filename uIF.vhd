@@ -10,10 +10,10 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.uIFDefs.all;
 
---! @brief Núcleo do uIF
+--! @brief Núcleo de processamento do uIF
 entity uIF is
   generic(
-    debug: boolean:= false --! indica se eh para ativar o debug
+    debug: boolean:= false --! indica se é para ativar o debug
   );
   port(
     -- sinais gerais
@@ -21,16 +21,16 @@ entity uIF is
 	 rst: in std_logic; --! sinal de reset
     -- interface com RAM
 	 datain: in std_logic_vector(data_size-1 downto 0); --! entrada de dados da RAM
-	 dataout: out std_logic_vector(data_size-1 downto 0); --! saida de dados para RAM
-	 we: out std_logic; --! habilitacao de escrita para RAM
-	 waddr: out std_logic_vector(ramsize-1 downto 0);
-	 raddr: out std_logic_vector(ramsize-1 downto 0);
+	 dataout: out std_logic_vector(data_size-1 downto 0); --! saída de dados para RAM
+	 we: out std_logic; --! habilitação de escrita para RAM 
+	 waddr: out std_logic_vector(ramsize-1 downto 0); --! endereço de escrita da RAM
+	 raddr: out std_logic_vector(ramsize-1 downto 0); --! endereço de leitura da RAM 
 	 -- interface com ROM
-	 progdata: in instruction;
-	 progaddr: out std_logic_vector(romsize-1 downto 0);
+	 progdata: in instruction; --! entrada de dados da ROM
+	 progaddr: out std_logic_vector(romsize-1 downto 0); --! endereço de leitura da ROM
 	 -- interface I/O
-	 isignals: in std_logic_vector(io_size-1 downto 0);
-	 osignals: out std_logic_vector(io_size-1 downto 0)
+	 isignals: in std_logic_vector(io_size-1 downto 0); --! sinais de entrada externos
+	 osignals: out std_logic_vector(io_size-1 downto 0) --! sinais de saída externos
   );
 end uIF;
 
@@ -217,7 +217,7 @@ begin
   -- sinais globais
   progaddr <= std_logic_vector(PC);
   
-  -- m´odulo I/O
+  -- módulo I/O
   iounit: entity work.iomodule(imp) port map(
     clk=> clk,
     rst=> rst,
@@ -231,7 +231,7 @@ begin
     readsignal=> inputblock
   );
 
-  -- mux de seleç~ao dos dados para escrita no GPR
+  -- mux de seleção dos dados para escrita no GPR
   gprmux: entity work.gprmux(imp) port map(
     clk=> clk,
     rst=> rst,
