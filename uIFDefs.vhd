@@ -38,34 +38,49 @@ subtype reg_subtype is std_logic_vector(2 downto 0); --! indicação do número 
 
 -- CONTROLE (inicia em 00) 
 
---! opcode do conjunto de instruções de controle do fluxo de execução
+--! Opcode do conjunto de instruções de controle do fluxo de execução
 constant controlcode: instr_type:= "00"; 
-subtype control_type is instr_subtype; --! opcodes específicos de controle
+--! Subtipo com opcodes específicos de controle
+subtype control_type is instr_subtype; 
 
--- nop               -- 00_0000
-constant nopcode: control_type:= "0000"; --! @brief Opcode da instrução nop 
-                                         --! @details Nenhuma operação
--- call addr			-- 00_0001
-constant callcode: control_type:= "0001"; --! @brief Opcode da instrução call addr
-                                          --! @details PC<-addr; (stack)<-PC+1; stack<- stack-2
--- ret					-- 00_0010
-constant retcode: control_type:= "0010";  --! @brief Opcode da instrução de retorno
-														--! @details PC<-(stack); stack<-stack+2
--- jmp addr	   		-- 00_0011
-constant jmpcode: control_type:= "0011"; --! @brief Opcode da instrução jmp addr
-													  --! @details PC<-addr
--- jpz addr          -- 00_0100
-constant jpzcode: control_type:= "0100"; --! @brief Opcode da instrução jpz addr
-													  --! @details if (Z) PC<-addr
--- jpnz addr         -- 00_0101
-constant jpnzcode: control_type:= "0101"; --! @brief Opcode da instrução jpnz addr
-														--! @details if (!Z) PC<-addr
--- jpc addr          -- 00_0110
-constant jpccode: control_type:= "0110"; --! @brief Opcode da instrução jpc addr
-													  --! @details if (C) PC<-addr
--- jpnc addr         -- 00_0111
-constant jpnccode: control_type:= "0111"; --! @bried Opcode da instrução jpnc addr
-														--! @details if (!C) PC<-addr
+--! @brief Opcode da instrução nop 
+--! @details Nenhuma operação
+constant nopcode: control_type:= "0000"; 
+
+--! @brief Opcode da instrução call addr
+--! @details PC<-addr; (stack)<-PC+1; stack<- stack-2
+--! @warning Afeta o PC e área de stack
+constant callcode: control_type:= "0001"; 
+
+--! @brief Opcode da instrução de retorno
+--! @details PC<-(stack); stack<-stack+2
+--! @warning Afeta o PC e área de stack
+constant retcode: control_type:= "0010";  
+
+--! @brief Opcode da instrução jmp addr
+--! @details PC<-addr
+--! @warning Afeta o PC
+constant jmpcode: control_type:= "0011"; 
+
+--! @brief Opcode da instrução jpz addr
+--! @details if (Z) PC<-addr
+--! @warning Afeta o PC
+constant jpzcode: control_type:= "0100"; 
+
+--! @brief Opcode da instrução jpnz addr
+--! @details if (!Z) PC<-addr
+--! @warning Afeta o PC
+constant jpnzcode: control_type:= "0101"; 
+
+--! @brief Opcode da instrução jpc addr
+--! @details if (C) PC<-addr
+--! @warning Afeta o PC
+constant jpccode: control_type:= "0110"; 
+
+--! @brief Opcode da instrução jpnc addr
+--! @details if (!C) PC<-addr
+--! @warning Afeta o PC
+constant jpnccode: control_type:= "0111"; 
 
 -- ULA (inicia em 01)
 --! Opcode do conjunto de instruções da ULA
@@ -154,9 +169,12 @@ constant rolcode: ula_type:= "1110";
 --! @warning Afeta os flags Z e S
 constant rorcode: ula_type:= "1111"; 
 
--- memoria e I/O (inicia em 10)		
-constant memorycode: std_logic_vector(1 downto 0):= "10"; --! opcode do conjunto de instruções de manipulação dos registradores
+-- MEMÓRIA E I/O (inicia em 10)		
+--! Opcode do conjunto de instruções de manipulação dos registradores, memória e I/O
+constant memorycode: std_logic_vector(1 downto 0):= "10"; 
+--! Subtipo que identifica os opcodes específicos de operações com memória e I/O
 subtype memory_type is instr_subtype;
+
 -- ld r1,r2,offset	-- 01_0000
 constant ldcode: memory_type:= "0000"; --! opcode da instruçao ld r1,r2,offset
 -- pensar em uma carga de memoria "distante"?? usando todo o espaço possivel...
