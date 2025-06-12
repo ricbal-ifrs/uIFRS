@@ -89,28 +89,28 @@ constant ulacode: instr_type:= "01";
 --! Subtipo que identifica os opcodes específicos de operações com o bloco da ULA
 subtype ula_type is instr_subtype;
 
---! @brief Opcode da instrução and r1,r2
---! @details Realiza a operaç~ao r1<- r1 and r2
+--! @brief Opcode da instrução and r1,r2 (01_0000)
+--! @details Realiza a operação r1<- r1 and r2
 --! @warning Afeta o flag Z
 constant andcode: ula_type:= "0000"; 
 
---! @brief Opcode da instrução and r1,val
+--! @brief Opcode da instrução and r1,val (01_0001)
 --! @brief Realiza a operaç~ao r1<- r1 and val
 --! @warning Afeta o flag Z
 constant andvcode: ula_type:= "0001"; 
 
---! @brief Opcode da instrução or r1,r2,val (00_0010)
---! @details Realiza a operaç~ao r1<- r1 or r2
+--! @brief Opcode da instrução or r1,r2,val (01_0010)
+--! @details Realiza a operação r1<- r1 or r2
 --! @warning Afeta o flag Z
 constant orcode: ula_type:= "0010"; 
 
---! @brief Opcode da instrução orv r1,val (00_0011)
---! @details Realiza a operaç~ao r1<- r1 or val
+--! @brief Opcode da instrução orv r1,val (01_0011)
+--! @details Realiza a operação r1<- r1 or val
 --! @warning Afeta o flag Z
 constant orvcode: ula_type:= "0011"; 
                            
---! @brief Opcode da instruç~ao xor r1,r2
---! @details Realiza a operaç~ao r1<- r1 xor r2
+--! @brief Opcode da instrução xor r1,r2 (01_0010)
+--! @details Realiza a operação r1<- r1 xor r2
 --! @warning Afeta o flag Z
 constant xorcode: ula_type:= "0100";
 
@@ -119,7 +119,7 @@ constant xorcode: ula_type:= "0100";
 --! @warning Afeta o flag Z
 constant notcode: ula_type:= "0101"; 
 
---! @brief Opcode da instruç~ao add r1,r2
+--! @brief Opcode da instrução add r1,r2
 --! @details Realiza a operaç~ao r1<- r1+r2 (soma sem carry)
 --! @warning Afeta os flags Z, S e C
 constant addcode: ula_type:= "0110";
@@ -180,6 +180,18 @@ constant ldcode: memory_type:= "0000"; --! opcode da instruçao ld r1,r2,offset
 -- pensar em uma carga de memoria "distante"?? usando todo o espaço possivel...
 -- st r1,r2,offset	-- 01_0001
 constant stcode: memory_type:= "0001"; --! opcode da instruçao st r1,r2,offset
+
+
+--! @brief Opcode da instrução push rA
+--! @details Realiza a operação (stack)<-rA; stack<- stack-1
+--! @warning Afeta área de stack
+constant pushcode: memory_type:= "0010"; 
+
+--! @brief Opcode da instrução pop rA
+--! @details Realiza a operação rA<-(stack); stack<- stack+1
+--! @warning Afeta área de stack
+constant popcode: memory_type:= "0011"; 
+
 -- in r1,port			-- 01_0100
 constant incode: memory_type:= "0100"; --! opcode da instruç~ao in r1,port
 -- out r1,port			-- 01_0101

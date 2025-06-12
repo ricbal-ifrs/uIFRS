@@ -108,7 +108,7 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 use work.uIFDefs.all;
 
---! Registrador de leitura da mem´oria SRAM com MUX de seleç~ao e interface com sistema de I/O
+--! Registrador de leitura da memória SRAM com MUX de seleç~ao e interface com sistema de I/O
 entity gprmux is
   port(
     clk: in std_logic; --! sinal de clock 
@@ -400,7 +400,7 @@ begin
 	     when ulacode =>
           is_instr_ula<= true;
 			 case local_ula_opcode is 
-			   when andcode|orcode|xorcode|addcode|subcode =>
+			   when andvcode|orvcode|addvcode|subvcode =>
 				  -- r1
 				  reg_update_sel<= r1_instr;
 				  -- r2
@@ -408,6 +408,15 @@ begin
 				  -- demais parametros ULA
 				  ULA_A<= r1;
 				  ULA_B<= local_valor;
+				when andcode|orcode|xorcode|addcode|subcode =>
+				  -- r1
+				  reg_update_sel<= r1_instr;
+				  -- r2
+				  r1_sel<= r1_instr;
+				  r2_sel<= r2_instr;
+				  -- demais parametros ULA
+				  ULA_A<= r1;
+				  ULA_B<= r2;
 				when notcode =>
               -- r1
               r1_sel<= r1_instr;
@@ -453,6 +462,44 @@ begin
 				  if (pstate=decodifica or pstate=executa) then
 				    we<= '1';
 				  end if;
+				when pushcode=>
+				  -- armazena na memória RAM, na posição indicada pelo stackreg
+              -- o valor do registrador indicado
+              case pstate is
+                when decodifica=>
+						-- o registrador a ser salvo é o parâmetro r1_sel
+						-- 3 bits que vem depois do opcode
+						r1_sel<= r1_instr;
+                when executa=>
+					   -- prepara a escrita na RAM do conteúdo de R1
+                  waddr<= std_logic_vector(stack_reg);
+						r1_sel<= r1_instr;
+						dataout <= r1;
+						we<= '1';
+                when others=>
+					   -- atualiza o ponteiro stack
+                  stack_new <= unsigned(ULAout);
+              end case;
+              -- aciona a ULA para subtrair o stack pelo tamanho necessário para armazenar um byte
+              -- se a RAM for maior que 256 posições, aí teremos que alterar esse mecanismo
+              ULA_A<= reg_word(stack_reg);
+              ULA_B<= b"0000_0001"; -- subtrai um, visto que o registrador só tem 1 byte
+              local_ula_opcode<= subvcode;
+				when popcode=> 
+				    when decodifica|executa=>
+					   -- digo de onde eu quero ler
+						raddr<= std_logic_vector(stack_reg+1);
+						-- o registrador que pretendo atualizar
+						reg_update_sel<= r1_instr;
+                when others=>
+					   -- atualiza o ponteiro stack
+                  stack_new <= unsigned(ULAout);
+              end case;
+              -- aciona a ULA para subtrair o stack pelo tamanho necessário para armazenar um byte
+              -- se a RAM for maior que 256 posições, aí teremos que alterar esse mecanismo
+              ULA_A<= reg_word(stack_reg);
+              ULA_B<= b"0000_0001"; -- subtrai um, visto que o registrador só tem 1 byte
+              local_ula_opcode<= addvcode;
 				when incode =>
 				  -- r1
 				  reg_update_sel<= r1_instr;
@@ -489,7 +536,7 @@ begin
               -- se a RAM for maior que 256 posiç~oes, a´i teremos que alterar esse mecanismo
               ULA_A<= reg_word(stack_reg);
               ULA_B<= b"0000_0010"; -- subtrai dois visto que cada endereço ocupa 2 bytes;
-              local_ula_opcode<= subcode;
+              local_ula_opcode<= subvcode;
             when retcode=>
               -- recupera o endereço de retorno da RAM (parte mais significativa)
               case pstate is
@@ -510,7 +557,7 @@ begin
               -- se a RAM for maior que 256 posiç~oes, a´i teremos que alterar esse mecanismo
               ULA_A<= reg_word(stack_reg);
               ULA_B<= b"0000_0010"; -- subtrai dois visto que cada endereço ocupa 2 bytes;
-              local_ula_opcode<= addcode;
+              local_ula_opcode<= addvcode;
             when others=>
           end case;
 		  when others=>
